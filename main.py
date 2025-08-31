@@ -11,8 +11,10 @@ Poisson Blending
 
 # enable if you want to show the source and target gradients combined
 show_grad = False
+# enable if you want to display a simple paste without blending
 show_simple_paste = False
-save_output = True
+# enable if you want to save the output image
+save_output = False
 
 
 if __name__ == '__main__':

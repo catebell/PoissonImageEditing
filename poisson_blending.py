@@ -105,8 +105,8 @@ def paste_source_img(source_matrix, target_matrix, mask_matrix, x0, y0, show_gra
                     Gy_source[h, w, c] = padded[h + 1, w + 1, c] - padded[h, w + 1, c]
 
     # [for visualization]
-    #M = np.sqrt(Gx_source * Gx_source + Gy_source * Gy_source)
-    #Image.fromarray(M.astype(np.uint8)).show()
+    M = np.sqrt(Gx_source * Gx_source + Gy_source * Gy_source)
+    Image.fromarray(M.astype(np.uint8)).show()
 
     if show_grad:
         # [NOT NECESSARY; FOR VISUALIZATION] grad target image:
