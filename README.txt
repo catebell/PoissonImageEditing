@@ -1,3 +1,0 @@
-- upload images in the [imgs] folder, then specify in [main.py] the path to the desired source, target and mask images.
-- masks can be created using GIMP as shown in the GitHub readme.
-- some outputs are already saved in the [output] folder. To save others, enable the corresponding code section in [main.py].
