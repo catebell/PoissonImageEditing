@@ -17,6 +17,56 @@ def simple_paste(src_matrix, tgt_matrix, bin_mask):
   return out
 
 
+def create_index(target_matrix, binary_mask):
+    """Return a copy of target_matrix where the pixels specified by the binary_mask are replaced by 0,1,2,... and -1 is set elsewhere."""
+
+    ix = -np.ones((target_matrix.shape[0], target_matrix.shape[1]), dtype=int)
+    i = 0
+
+    for r in range(target_matrix.shape[0]):
+        for c in range(target_matrix.shape[1]):
+            if binary_mask[r, c]:
+                ix[r, c] = i
+                i = i + 1
+    print("Pixels to be reconstructed: " + str(i))
+    return ix, i
+
+
+def compute_gradients(img_matrix, show_grad, binary_mask=None):
+    """Return x and y components of the image gradient. If a binary mask is passed (preferably along with source images,
+    better execution time), the gradient is computed only in the specified area."""
+
+    padded = np.zeros((img_matrix.shape[0] + 2, img_matrix.shape[1] + 2, 3))
+    padded[1:-1, 1:-1, :] = img_matrix.copy()
+    padded[1:-1, 0] = padded[1:-1, 1]
+    padded[1:-1, -1] = padded[1:-1, -2]
+    padded[0, 1:-1] = padded[1, 1:-1]
+    padded[-1, 1:-1] = padded[-2, 1:-1]
+
+    Gx = np.zeros((img_matrix.shape[0], img_matrix.shape[1], 3))
+    Gy = np.zeros((img_matrix.shape[0], img_matrix.shape[1], 3))
+
+    for c in range(3):
+        for h in range(img_matrix.shape[0]):
+            for w in range(img_matrix.shape[1]):
+                if binary_mask is not None:
+                    if binary_mask[h, w]:  # compute only gradients of pixels in the mask, better execution time
+                        Gx[h, w, c] = padded[h + 1, w + 1, c] - padded[h + 1, w, c]
+                        Gy[h, w, c] = padded[h + 1, w + 1, c] - padded[h, w + 1, c]
+                else:
+                    # padded[h+1,w+1] corresponds to matrix[h,w]
+                    Gx[h, w, c] = padded[h + 1, w + 1, c] - padded[h + 1, w, c]
+                    Gy[h, w, c] = padded[h + 1, w + 1, c] - padded[h, w + 1, c]
+
+    if show_grad:
+        # [for visualization]
+        M = np.sqrt(Gx * Gx + Gy * Gy)
+        Image.fromarray(M.astype(np.uint8)).show()
+
+    return Gx, Gy
+
+###
+
 def paste_source_img(source_matrix, target_matrix, mask_matrix, x0, y0, show_grad, show_simple_paste):
     print(target_matrix.shape)
     print(source_matrix.shape)
@@ -69,69 +119,19 @@ def paste_source_img(source_matrix, target_matrix, mask_matrix, x0, y0, show_gra
     # the gradient will be computed considering the whole source image, not only the masked part
     source_extended[y0: y0 + source_masked.shape[0], x0: x0 + source_masked.shape[1]] = source_matrix
 
-    # index of the pixels to be reconstructed:
-
-    ix = -np.ones((target_matrix.shape[0], target_matrix.shape[1]), dtype=int)
-    i = 0
-
-    for r in range(target_matrix.shape[0]):
-        for c in range(target_matrix.shape[1]):
-            if binary_mask[r, c]:
-                ix[r, c] = i
-                i = i + 1
-    print("Pixels to be reconstructed: " + str(i))
-
-    N = i
-
-    # grad source image:
+    # index of the pixels to be reconstructed
+    ix, N = create_index(target_matrix,binary_mask)
 
     print("Computing gradients...")
 
-    padded = np.zeros((source_extended.shape[0] + 2, source_extended.shape[1] + 2, 3))
-    padded[1:-1, 1:-1, :] = source_extended.copy()
-    padded[1:-1, 0] = padded[1:-1, 1]
-    padded[1:-1, -1] = padded[1:-1, -2]
-    padded[0, 1:-1] = padded[1, 1:-1]
-    padded[-1, 1:-1] = padded[-2, 1:-1]
-
-    Gx_source = np.zeros((source_extended.shape[0], source_extended.shape[1], 3))
-    Gy_source = np.zeros((source_extended.shape[0], source_extended.shape[1], 3))
-
-    for c in range(3):
-        for h in range(source_extended.shape[0]):
-            for w in range(source_extended.shape[1]):
-                if binary_mask[h, w]:  # compute only gradients of pixels in the mask
-                    Gx_source[h, w, c] = padded[h + 1, w + 1, c] - padded[h + 1, w, c]
-                    Gy_source[h, w, c] = padded[h + 1, w + 1, c] - padded[h, w + 1, c]
-
-    # [for visualization]
-    M = np.sqrt(Gx_source * Gx_source + Gy_source * Gy_source)
-    Image.fromarray(M.astype(np.uint8)).show()
+    # grad source image:
+    Gx_source, Gy_source = compute_gradients(source_extended, show_grad, binary_mask)
 
     if show_grad:
-        # [NOT NECESSARY; FOR VISUALIZATION] grad target image:
+        # [NOT NECESSARY TO COMPUTE OTHER GRADIENTS HERE; FOR VISUALIZATION]
 
-        padded = np.zeros((target_matrix.shape[0] + 2, target_matrix.shape[1] + 2, 3))
-        # to keep dimensions from img matrix and its grad matrix --> padding by replicating border pixels
-        padded[1:-1, 1:-1, :] = target_matrix.copy()
-        padded[1:-1, 0] = padded[1:-1, 1]
-        padded[1:-1, -1] = padded[1:-1, -2]
-        padded[0, 1:-1] = padded[1, 1:-1]
-        padded[-1, 1:-1] = padded[-2, 1:-1]
-
-        Gx_target = np.zeros((target_matrix.shape[0], target_matrix.shape[1], 3))
-        Gy_target = np.zeros((target_matrix.shape[0], target_matrix.shape[1], 3))
-
-        for c in range(3):
-            for h in range(target_matrix.shape[0]):
-                for w in range(target_matrix.shape[1]):
-                        # padded [h+1,w+1] corresponds to target [h,w]
-                        Gx_target[h, w, c] = padded[h + 1, w + 1, c] - padded[h + 1, w, c]
-                        Gy_target[h, w, c] = padded[h + 1, w + 1, c] - padded[h, w + 1, c]
-
-        # [for visualization]
-        M = np.sqrt(Gx_target * Gx_target + Gy_target * Gy_target)
-        Image.fromarray(M.astype(np.uint8)).show()
+        # grad target image
+        Gx_target, Gy_target = compute_gradients(target_matrix, show_grad)
 
         # replacing target grads in the masked area with source grads:
 
@@ -167,9 +167,174 @@ def paste_source_img(source_matrix, target_matrix, mask_matrix, x0, y0, show_gra
 
                 A[i, i] = 4
                 b[i] = Gx_source[r, c, ch] - Gx_source[r, c + 1, ch] + Gy_source[r, c, ch] - Gy_source[r + 1, c, ch]
-                # same as b[i] = 4*source_extended[r,c,ch] - source_extended[r-1,c,ch] - source_extended[r+1,c,ch] - source_extended[r,c+1,ch] - source_extended[r,c-1,ch]
+                # Same as b[i] = 4*source_extended[r,c,ch] - source_extended[r-1,c,ch] - source_extended[r+1,c,ch] - source_extended[r,c+1,ch] - source_extended[r,c-1,ch]
                 # but considering padding for eventual image borders and allowing decoupling for grad visualization.
-                # using the formulation above there's no need for any Gx,Gy computation
+                # Using the second formulation there's no need for any Gx,Gy computation
+
+                if binary_mask[r - 1, c] == 0:  # top pixel known
+                    b[i] = b[i] + target_matrix[r - 1, c, ch]
+                else:
+                    unknown_c = ix[r - 1, c]
+                    A[i, unknown_c] = -1
+                if binary_mask[r + 1, c] == 0:  # bottom pixel known
+                    b[i] = b[i] + target_matrix[r + 1, c, ch]
+                else:
+                    unknown_c = ix[r + 1, c]
+                    A[i, unknown_c] = -1
+                if binary_mask[r, c - 1] == 0:  # left pixel known
+                    b[i] = b[i] + target_matrix[r, c - 1, ch]
+                else:
+                    unknown_c = ix[r, c - 1]
+                    A[i, unknown_c] = -1
+                if binary_mask[r, c + 1] == 0:  # right pixel known
+                    b[i] = b[i] + target_matrix[r, c + 1, ch]
+                else:
+                    unknown_c = ix[r, c + 1]
+                    A[i, unknown_c] = -1
+                i = i + 1
+
+        print("b: " + str(b))
+        x = spsolve(A.tocsr(), b)
+        print("x: " + str(x))
+        x_array[ch, :] = np.clip(x, 0, 255)
+
+    output = target_matrix.copy()
+    for ch in range(3):
+        for r in range(ix.shape[0]):
+            for c in range(ix.shape[1]):
+                if ix[r, c] != -1:
+                    output[r, c, ch] = x_array[ch, ix[r, c]]
+
+    return output
+
+###
+
+def texture_transfer(source_matrix, target_matrix, mask_matrix, monochrome, show_grad, show_simple_paste):
+    """source_matrix and target_matrix should already have same x and y dimensions."""
+    print(target_matrix.shape)
+    print(source_matrix.shape)
+
+    # src img could have more than 3 channels:
+    if source_matrix.shape[2] > 3:
+        source_matrix = source_matrix[:, :, :3].copy()
+        print("Reshaped src_matrix to: " + str(source_matrix.shape))
+
+    # tgt img could have more than 3 channels:
+    if target_matrix.shape[2] > 3:
+        target_matrix = target_matrix[:, :, :3].copy()
+        print("Reshaped tgt_matrix to: " + str(target_matrix.shape))
+
+    # mask has multiple channels, but the binary_mask is contained in only one (might change based on how the mask is created):
+    s = 0
+    for i in range(mask_matrix.shape[2]):
+        if len(np.unique(
+                mask_matrix[:, :, i])) > 1:  # only one channel has more than 1 value, if the mask is created correctly
+            s = i
+            break
+
+    mask_matrix = mask_matrix[:, :, s]
+
+    source_masked = source_matrix.copy()
+    for r in range(source_masked.shape[0]):
+        for c in range(source_masked.shape[1]):
+            if not mask_matrix[r, c]:
+                source_masked[r, c] = source_matrix[r, c]
+            else:
+                source_masked[r, c] = 0
+
+    binary_mask_3ch = source_masked.copy().astype(np.bool)
+    # collapsing the three channels to have only one
+    binary_mask = binary_mask_3ch[:, :, 0]
+    binary_mask[binary_mask_3ch[:, :, 1] == True] = True
+    binary_mask[binary_mask_3ch[:, :, 2] == True] = True
+
+    if show_simple_paste:
+        Image.fromarray(simple_paste(source_masked, target_matrix, binary_mask)).show()
+
+    # index of the pixels to be reconstructed
+    ix, N = create_index(target_matrix, binary_mask)
+
+    # grad target image
+    Gx_target, Gy_target = compute_gradients(target_matrix, show_grad)
+
+    grad_insertion_x = Gx_target.copy()
+    grad_insertion_y = Gy_target.copy()
+
+    # MIXING GRADIENTS
+
+    if monochrome:
+        # monochrome transfer
+        source_monochrome = Image.fromarray(source_matrix).convert('L')
+        source_matrix = np.asarray(source_monochrome, copy=True)
+
+        # grad source image, not on 3 channels so computed here
+        padded = np.zeros((source_matrix.shape[0] + 2, source_matrix.shape[1] + 2))
+        padded[1:-1, 1:-1] = source_matrix.copy()
+        padded[1:-1, 0] = padded[1:-1, 1]
+        padded[1:-1, -1] = padded[1:-1, -2]
+        padded[0, 1:-1] = padded[1, 1:-1]
+        padded[-1, 1:-1] = padded[-2, 1:-1]
+
+        Gx_source = np.zeros((source_matrix.shape[0], source_matrix.shape[1]))
+        Gy_source = np.zeros((source_matrix.shape[0], source_matrix.shape[1]))
+
+        for h in range(source_matrix.shape[0]):
+            for w in range(source_matrix.shape[1]):
+                if binary_mask[h, w]:  # compute only gradients of pixels in the mask
+                    Gx_source[h, w] = padded[h + 1, w + 1] - padded[h + 1, w]
+                    Gy_source[h, w] = padded[h + 1, w + 1] - padded[h, w + 1]
+
+        if show_grad:
+            # [for visualization]
+            M = np.sqrt(Gx_source * Gx_source + Gy_source * Gy_source)
+            Image.fromarray(M.astype(np.uint8))
+
+        for ch in range(3):
+            for r in range(binary_mask.shape[0]):
+                for c in range(binary_mask.shape[1]):
+                    if binary_mask[r, c]:
+                        if Gx_source[r, c] > Gx_target[r, c, ch]:
+                            grad_insertion_x[r, c, ch] = Gx_source[r, c]
+                            grad_insertion_x[r, c + 1, ch] = Gx_source[r, c + 1]
+                        if Gy_source[r, c] > Gy_target[r, c, ch]:
+                            grad_insertion_y[r, c, ch] = Gy_source[r, c]
+                            grad_insertion_y[r + 1, c, ch] = Gy_source[r + 1, c]
+    else:
+        # not monochrome transfer
+        # grad source image
+        Gx_source, Gy_source = compute_gradients(source_matrix, show_grad, binary_mask)
+
+        for ch in range(3):
+          for r in range(binary_mask.shape[0]):
+            for c in range(binary_mask.shape[1]):
+              if binary_mask[r,c]:
+                if Gx_source[r,c,ch] > Gx_target[r,c,ch]:
+                  grad_insertion_x[r,c,ch] = Gx_source[r,c,ch]
+                  grad_insertion_x[r,c+1,ch] = Gx_source[r,c+1,ch]
+                if Gy_source[r,c,ch] > Gy_target[r,c,ch]:
+                  grad_insertion_y[r,c,ch] = Gy_source[r,c,ch]
+                  grad_insertion_y[r+1,c,ch] = Gy_source[r+1,c,ch]
+
+    if show_grad:
+        # [for visualization]
+        M = np.sqrt(grad_insertion_x * grad_insertion_x + grad_insertion_y * grad_insertion_y)
+        Image.fromarray(M.astype(np.uint8))
+
+    x_array = np.zeros((3, N))
+    for ch in range(3):
+        i = 0
+        A = lil_matrix((N, N))
+        b = np.zeros(N)
+
+        # r e c per scorrere sulla matrice immagine e sulla maschera
+        for r in range(0, target_matrix.shape[0]):
+            for c in range(0, target_matrix.shape[1]):
+
+                if binary_mask[r, c] == 0: continue  # non è un pixel da ricostruire
+
+                A[i, i] = 4
+                b[i] = grad_insertion_x[r, c, ch] - grad_insertion_x[r, c + 1, ch] + grad_insertion_y[r, c, ch] - \
+                       grad_insertion_y[r + 1, c, ch]
 
                 if binary_mask[r - 1, c] == 0:  # top pixel known
                     b[i] = b[i] + target_matrix[r - 1, c, ch]
