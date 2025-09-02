@@ -4,22 +4,25 @@ Implementation of the 2003 paper 'Poisson image editing' by Patrick Pérez, Mich
 <p></p>
 
 Presentation → 
-[Poisson Image Editing.pdf](https://github.com/user-attachments/files/22067945/Poisson.Image.Editing.pdf)
+[PoissonImageEditing.pdf](https://github.com/user-attachments/files/22098267/PoissonImageEditing.pdf)
 
+*Seamless cloning*
 <p align="center">
-  <img width="1330" height="346" alt="Screenshot 2025-08-31 201516" src="https://github.com/user-attachments/assets/2719f14a-55f2-403e-8d51-cabdd367e222" />
+  <img width="1000" alt="Screenshot 2025-08-31 201516" src="https://github.com/user-attachments/assets/2719f14a-55f2-403e-8d51-cabdd367e222" />
 </p>
-  
+
+*Texture Transfer*
+<p align="center">
+  <img width="500" alt="Screenshot 2025-09-02 171637" src="https://github.com/user-attachments/assets/884cb3f4-8aad-4ebd-ab34-a2d5b18282be" />
+  <img width="500" height="538" alt="Screenshot 2025-09-02 171722" src="https://github.com/user-attachments/assets/2b966f55-aec1-4aea-9ff7-76c9ea342bbd" />
+</p>
+
 Gradient-wise:
 <p align="center">
   <img width="500" alt="Screenshot 2025-08-31 200917" src="https://github.com/user-attachments/assets/beb3d2fe-25f3-425c-b3f0-63b7ba41abb6" />
-</p>
-<p align="center">
   <img width="500" alt="Screenshot 2025-08-31 201809" src="https://github.com/user-attachments/assets/2a97ab8c-5170-4198-b00f-829aea975d20" />
 </p>
-<p align="center">
-  <img width="500" alt="Screenshot 2025-08-31 201001" src="https://github.com/user-attachments/assets/b4ef1605-8ff3-4948-a1fc-699c58f392ea" />
-</p>
+
 <p align="center">
   ...
 </p>
