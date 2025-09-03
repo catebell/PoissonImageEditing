@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-from poisson_blending import paste_source_img, texture_transfer
+from poisson_blending import paste_source_img, texture_transfer, seamless_tiling
 import os
 from datetime import datetime
 from pathlib import Path
@@ -15,45 +15,45 @@ show_grad = False
 # enable if you want to display a simple paste without blending
 show_simple_paste = True
 # enable if you want to save the output image
-save_output = True
+save_output = False
 # disable if you want to keep also a bit of color for texture transfer
 monochrome = True
 
 
 if __name__ == '__main__':
-
     start_time = time.time()
 
     # SEAMLESS CLONING
-
+    '''
     # besides are specified y0,x0 (top-left coordinates from where to place the source image in a target)
 
-    y0 = 5
-    x0 = 5
+    y0 = 200
+    x0 = 200
+
 
     #source = Image.open('imgs/kitten.png')  # y0=330 x0=250  with library
-    #source = Image.open('imgs/balloon.png')  # y0=200 x0=200 with colosseum
+    source = Image.open('imgs/balloon.png')  # y0=200 x0=200 with colosseum
     #source = Image.open('imgs/penguin.png')  # y0=330 x0=250 with library
     #source = Image.open('imgs/butterfly.jpg')  # y0=100 x0=400  with grass
     #source = Image.open('imgs/seagull.jpg')  # y0=100 x0=200 with sea
-    source = Image.open('imgs/df.png')  # y0=5 x0=5 with wall
+    #source = Image.open('imgs/df.png')  # y0=5 x0=5 with wall
 
 
     #target = Image.open('imgs/library.png')
-    #target = Image.open('imgs/colosseum.png')
+    target = Image.open('imgs/colosseum.png')
     #target = Image.open('imgs/grass.jpg')
     #target = Image.open('imgs/sea.jpg')
-    target = Image.open('imgs/wall.png')
+    #target = Image.open('imgs/wall.png')
 
     #mask = Image.open('imgs/kitten_mask.png')
-    #mask = Image.open('imgs/balloon_mask.png')
+    mask = Image.open('imgs/balloon_mask.png')
     #mask = Image.open('imgs/penguin_mask.png')
     #mask = Image.open('imgs/butterfly_mask.png')
     #mask = Image.open('imgs/seagull_mask.png')
-    mask = Image.open('imgs/df_mask.png')
+    #mask = Image.open('imgs/df_mask.png')
 
     reconstructed = paste_source_img(np.asarray(source),np.asarray(target),np.asarray(mask), x0, y0, show_grad, show_simple_paste)
-
+    '''
 
     '''
     [OPTIONAL]
@@ -77,16 +77,27 @@ if __name__ == '__main__':
     mask = Image.open('imgs_textures_transfer/pear_mask.png')
 
     reconstructed = texture_transfer(np.asarray(source), np.asarray(target), np.asarray(mask), monochrome, show_grad, show_simple_paste)
+    '''
 
+    # SEAMLESS TILING
+    source = Image.open('imgs_seamless_tile/wall_white.jpg')
+    target = None
+    reconstructed = seamless_tiling(np.asarray(source),3,2, show_grad, show_simple_paste)
 
+    # OUTPUT
     output_img = Image.fromarray(reconstructed)
     output_img.show()
-    '''
+
     if save_output:
         outpath = os.path.join("output")
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        output_img.save(os.path.join(outpath, Path(target.filename).stem + "_" + Path(source.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
+        if source is None:
+            output_img.save(os.path.join(outpath, Path(target.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
+        if target is None:
+            output_img.save(os.path.join(outpath, Path(source.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
+        else:
+            output_img.save(os.path.join(outpath, Path(target.filename).stem + "_" + Path(source.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
 
     print("--- %s seconds ---" % (time.time() - start_time))
