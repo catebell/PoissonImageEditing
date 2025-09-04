@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     # SEAMLESS TILING
     '''
-    source = Image.open('imgs_seamless_tile/grass_texture.jpg')
+    source = Image.open('imgs_seamless_tile/paper.png')
     target = None
     reconstructed = seamless_tiling(np.asarray(source),2,2, show_grad, show_simple_paste)
     '''
