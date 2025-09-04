@@ -4,7 +4,7 @@ Implementation of the 2003 paper 'Poisson image editing' by Patrick Pérez, Mich
 <p></p>
 
 Presentation → 
-[PoissonImageBlending.pdf](https://github.com/user-attachments/files/22138639/PoissonImageBlending.pdf)
+[PoissonImageBlending.pdf](https://github.com/user-attachments/files/22139256/PoissonImageBlending.pdf)
 
 *Seamless cloning*
 <p align="center">
