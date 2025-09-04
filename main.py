@@ -23,14 +23,16 @@ monochrome = True
 if __name__ == '__main__':
     start_time = time.time()
 
+    """examples functions calls, de-comment the one to use."""
+
     # SEAMLESS CLONING
-    '''
+
     # besides are specified y0,x0 (top-left coordinates from where to place the source image in a target)
 
     y0 = 200
     x0 = 200
 
-
+    
     #source = Image.open('imgs/kitten.png')  # y0=330 x0=250  with library
     source = Image.open('imgs/balloon.png')  # y0=200 x0=200 with colosseum
     #source = Image.open('imgs/penguin.png')  # y0=330 x0=250 with library
@@ -53,10 +55,9 @@ if __name__ == '__main__':
     #mask = Image.open('imgs/df_mask.png')
 
     reconstructed = paste_source_img(np.asarray(source),np.asarray(target),np.asarray(mask), x0, y0, show_grad, show_simple_paste)
-    '''
 
     '''
-    [OPTIONAL]
+    [OPTIONAL, EXAMPLE]
     # add a person
     source = Image.open('imgs/person_swimming_1.jpg')  # x0=250 y0=550 with sea
     mask = Image.open('imgs/person_swimming_1_mask.png')
@@ -80,9 +81,11 @@ if __name__ == '__main__':
     '''
 
     # SEAMLESS TILING
-    source = Image.open('imgs_seamless_tile/wall_white.jpg')
+    '''
+    source = Image.open('imgs_seamless_tile/grass_texture.jpg')
     target = None
-    reconstructed = seamless_tiling(np.asarray(source),3,2, show_grad, show_simple_paste)
+    reconstructed = seamless_tiling(np.asarray(source),2,2, show_grad, show_simple_paste)
+    '''
 
     # OUTPUT
     output_img = Image.fromarray(reconstructed)
@@ -93,8 +96,6 @@ if __name__ == '__main__':
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        if source is None:
-            output_img.save(os.path.join(outpath, Path(target.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
         if target is None:
             output_img.save(os.path.join(outpath, Path(source.filename).stem + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"))
         else:
