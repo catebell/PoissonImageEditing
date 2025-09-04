@@ -4,17 +4,11 @@ Implementation of the 2003 paper 'Poisson image editing' by Patrick Pérez, Mich
 <p></p>
 
 Presentation → 
-[PoissonImageEditing.pdf](https://github.com/user-attachments/files/22098267/PoissonImageEditing.pdf)
+[PoissonImageBlending.pdf](https://github.com/user-attachments/files/22136101/PoissonImageBlending.pdf)
 
 *Seamless cloning*
 <p align="center">
   <img width="1000" alt="Screenshot 2025-08-31 201516" src="https://github.com/user-attachments/assets/2719f14a-55f2-403e-8d51-cabdd367e222" />
-</p>
-
-*Texture Transfer*
-<p align="center">
-  <img width="500" alt="Screenshot 2025-09-02 171637" src="https://github.com/user-attachments/assets/884cb3f4-8aad-4ebd-ab34-a2d5b18282be" />
-  <img width="500" height="538" alt="Screenshot 2025-09-02 171722" src="https://github.com/user-attachments/assets/2b966f55-aec1-4aea-9ff7-76c9ea342bbd" />
 </p>
 
 Gradient-wise:
@@ -28,6 +22,18 @@ Gradient-wise:
 </p>
 <p align="center">
   <img width="500" alt="Screenshot 2025-08-31 201126" src="https://github.com/user-attachments/assets/92f6c881-8af0-4b84-baa8-aff8bef2b084" />
+</p>
+
+*Texture Transfer*
+<p align="center">
+  <img width="500" alt="Screenshot 2025-09-02 171637" src="https://github.com/user-attachments/assets/884cb3f4-8aad-4ebd-ab34-a2d5b18282be" />
+  <img width="500" height="538" alt="Screenshot 2025-09-02 171722" src="https://github.com/user-attachments/assets/2b966f55-aec1-4aea-9ff7-76c9ea342bbd" />
+</p>
+
+*Seamless Tiling*
+<p align="center">
+  <img height="210" alt="Screenshot 2025-09-04 122026" src="https://github.com/user-attachments/assets/f3ad1995-f679-4858-b020-0260de560b9e" />
+  <img height="210" alt="Screenshot 2025-09-04 122239" src="https://github.com/user-attachments/assets/27c3465b-660b-4a94-8fca-d5e885371903" />
 </p>
 
 ## Tips
@@ -88,3 +94,8 @@ Source image from where to extract the texture: <p></p>
   <img width="200" alt="pear_mask" src="https://github.com/user-attachments/assets/6b4709dc-baa7-4af8-822a-ad0bc09b07b8" />
   <img width="200" alt="kiwi_cut" src="https://github.com/user-attachments/assets/36640e7a-981a-424f-bda3-dc10d461df46" />
 </p>
+
+## Input-like image for seamless tiling
+<img width="187" alt="paper" src="https://github.com/user-attachments/assets/ebbb882d-1c19-4f72-9643-30aaf5e1a2eb" />  &nbsp;&nbsp;&nbsp;&nbsp;
+<img width="187" alt="wall_white" src="https://github.com/user-attachments/assets/d3c3f61f-b2f6-4a1d-9620-62bda16932ca" />  &nbsp;&nbsp;&nbsp;&nbsp;
+<img width="187" alt="grass_texture" src="https://github.com/user-attachments/assets/b7cca2ed-9410-450a-800a-d04dcfc4dfc2" />
