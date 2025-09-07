@@ -168,12 +168,12 @@ def paste_source_img(source_matrix, target_matrix, mask_matrix, x0, y0, show_gra
                 if binary_mask[r, c] == 0: continue  # not a pixel to be reconstructed
 
                 A[i, i] = 4
-                # b[i] = Gx_source[r, c, ch] - Gx_source[r, c + 1, ch] + Gy_source[r, c, ch] - Gy_source[r + 1, c, ch]
+
+                '''b[i] = Gx_source[r, c, ch] - Gx_source[r, c + 1, ch] + Gy_source[r, c, ch] - Gy_source[r + 1, c, ch],
+                but other terms subtracted only where possible (not on img border)'''
                 # Same as b[i] = 4*source_extended[r,c,ch] - source_extended[r-1,c,ch] - source_extended[r+1,c,ch] - source_extended[r,c+1,ch] - source_extended[r,c-1,ch]
                 # but considering padding for eventual image borders and allowing decoupling for grad visualization.
                 # Using the second formulation there's no need for any Gx,Gy computation
-                '''b[i] = Gx_source[r, c, ch] - Gx_source[r, c + 1, ch] + Gy_source[r, c, ch] - Gy_source[r + 1, c, ch],
-                but other terms subtracted only where possible (not on img border)'''
 
                 b[i] = Gx_source[r, c, ch] + Gy_source[r, c, ch]
                 if r < target_matrix.shape[0] - 1:
@@ -269,6 +269,8 @@ def texture_transfer(source_matrix, target_matrix, mask_matrix, monochrome, show
     # index of the pixels to be reconstructed
     ix, N = create_index(target_matrix, binary_mask)
 
+    print("Computing gradients...")
+
     # grad target image
     Gx_target, Gy_target = compute_gradients(target_matrix, show_grad)
 
@@ -334,6 +336,8 @@ def texture_transfer(source_matrix, target_matrix, mask_matrix, monochrome, show
         # [for visualization]
         M = np.sqrt(grad_insertion_x * grad_insertion_x + grad_insertion_y * grad_insertion_y)
         Image.fromarray(M.astype(np.uint8))
+
+    print("Reconstructing image...")
 
     x_array = np.zeros((3, N))
     for ch in range(3):
@@ -406,6 +410,8 @@ def seamless_tiling(source_matrix, x_repetitions, y_repetitions, show_grad=False
 
     ix, N = create_index(source_matrix, binary_mask)
 
+    print("Computing gradients...")
+
     # grad source image
     Gx_source, Gy_source = compute_gradients(source_matrix, show_grad, binary_mask)
 
@@ -414,8 +420,9 @@ def seamless_tiling(source_matrix, x_repetitions, y_repetitions, show_grad=False
     west = source_matrix[:, 0].astype(float)
     east = source_matrix[:, -1].astype(float)
 
-    x_array = np.zeros((3, N))
+    print("Reconstructing image...")
 
+    x_array = np.zeros((3, N))
     for ch in range(3):
         i = 0
         A = lil_matrix((N, N))
