@@ -40,7 +40,7 @@ Gradient-wise:
 - upload images in the [imgs] folder, then specify in [main.py] the path to the desired source, target and mask images.
 - masks can be created using GIMP as shown below.
 - some outputs are already saved in the [output] folder. To save others, enable the corresponding code section in [main.py].
-- in [poisson_blending] comment/decomment intermediate lines for gradients visualization if desired
+- in [poisson_blending] comment/decomment intermediate lines for gradients visualization if desired.
 
 ## How to create a mask for seamless cloning
 - Open source image and create new level <p></p>
